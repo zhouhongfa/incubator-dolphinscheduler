@@ -20,30 +20,31 @@
          v-for="(item,$index) in localStatementList"
          :key="item.id"
          @click="_getIndex($index)">
-      <x-input
+      <el-input
         :disabled="isDetails"
         type="textarea"
+        size="small"
         resize="none"
         :autosize="{minRows:1}"
         :placeholder="$t('Please enter a non-query SQL statement')"
         v-model="localStatementList[$index]"
-        @on-blur="_verifProp()"
+        @blur="_verifProp()"
         style="width: 525px;">
-      </x-input>
+      </el-input>
       <span class="lt-add">
         <a href="javascript:" style="color:red;" @click="!isDetails && _removeStatement($index)" >
-          <i class="iconfont" :class="_isDetails" data-toggle="tooltip" :title="$t('delete')" >&#xe611;</i>
+          <em class="el-icon-delete" :class="_isDetails" data-toggle="tooltip" :title="$t('delete')" ></em>
         </a>
       </span>
       <span class="add" v-if="$index === (localStatementList.length - 1)">
         <a href="javascript:" @click="!isDetails && _addStatement()" >
-          <i class="iconfont" :class="_isDetails" data-toggle="tooltip" :title="$t('Add')">&#xe636;</i>
+          <em class="el-icon-circle-plus-outline" :class="_isDetails" data-toggle="tooltip" :title="$t('Add')"></em>
         </a>
       </span>
     </div>
     <span class="add" v-if="!localStatementList.length">
       <a href="javascript:" @click="!isDetails && _addStatement()" >
-        <i class="iconfont" :class="_isDetails" data-toggle="tooltip" :title="$t('Add')">&#xe636;</i>
+        <em class="el-icon-circle-plus-outline" :class="_isDetails" data-toggle="tooltip" :title="$t('Add')"></em>
       </a>
     </span>
   </div>
@@ -149,10 +150,10 @@
     .add {
       a {
         .iconfont {
-          font-size: 18px;
+          font-size: 16px;
           vertical-align: middle;
           display: inline-block;
-          margin-top: 1px;
+          margin-top: -5px;
         }
       }
     }

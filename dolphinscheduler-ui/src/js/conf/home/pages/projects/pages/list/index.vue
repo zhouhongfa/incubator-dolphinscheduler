@@ -19,18 +19,35 @@
     <template slot="conditions">
       <m-conditions @on-conditions="_onConditions">
         <template slot="button-group">
-          <x-button type="ghost" size="small" @click="_create('')">{{$t('Create Project')}}</x-button>
+          <el-button size="mini" @click="_create('')">{{ $t('Create Project') }}</el-button>
+          <el-dialog
+            :title="item ? $t('Edit') : $t('Create Project')"
+            v-if="createProjectDialog"
+            :visible.sync="createProjectDialog"
+            width="auto">
+            <m-create-project :item="item" @_onUpdate="_onUpdate" @close="_close"></m-create-project>
+          </el-dialog>
         </template>
       </m-conditions>
     </template>
     <template slot="content">
-      <template v-if="projectsList.length">
-        <m-list :projects-list="projectsList" @on-update="_onUpdate" :page-no="searchParams.pageNo" :page-size="searchParams.pageSize"></m-list>
+      <template v-if="projectsList.length || total>0">
+        <m-list :projects-list="projectsList" @on-update="_onUpdate" :page-no="searchParams.pageNo"
+                :page-size="searchParams.pageSize"></m-list>
         <div class="page-box">
-          <x-page :current="parseInt(searchParams.pageNo)" :total="total" :page-size="searchParams.pageSize" show-elevator @on-change="_page" show-sizer :page-size-options="[10,30,50]" @on-size-change="_pageSize"></x-page>
+          <el-pagination
+            background
+            @current-change="_page"
+            @size-change="_pageSize"
+            :page-size="searchParams.pageSize"
+            :current-page.sync="searchParams.pageNo"
+            :page-sizes="[10, 30, 50]"
+            layout="sizes, prev, pager, next, jumper"
+            :total="total">
+          </el-pagination>
         </div>
       </template>
-      <template v-if="!projectsList.length">
+      <template v-if="!projectsList.length && total<=0">
         <m-no-data></m-no-data>
       </template>
       <m-spin :is-spin="isLoading" :is-left="false"></m-spin>
@@ -48,7 +65,6 @@
   import mConditions from '@/module/components/conditions/conditions'
   import mListConstruction from '@/module/components/listConstruction/listConstruction'
 
-
   export default {
     name: 'projects-list',
     data () {
@@ -60,7 +76,9 @@
           pageSize: 10,
           pageNo: 1,
           searchVal: ''
-        }
+        },
+        createProjectDialog: false,
+        item: {}
       }
     },
     mixins: [listUrlParamHandle],
@@ -82,38 +100,27 @@
         this.searchParams.pageSize = val
       },
       _create (item) {
-        let self = this
-        let modal = this.$modal.dialog({
-          closable: false,
-          showMask: true,
-          escClose: true,
-          className: 'v-modal-custom',
-          transitionName: 'opacityp',
-          render (h) {
-            return h(mCreateProject, {
-              on: {
-                onUpdate () {
-                  self._debounceGET()
-                  modal.remove()
-                }
-              },
-              props: {
-                item: item
-              }
-            })
-          }
-        })
+        this.createProjectDialog = true
+        this.item = item
       },
       _onUpdate () {
+        this.createProjectDialog = false
         this._debounceGET()
+      },
+      _close () {
+        this.createProjectDialog = false
       },
       _getList (flag) {
         this.isLoading = !flag
         this.getProjectsList(this.searchParams).then(res => {
-          this.projectsList = []
-          this.projectsList = res.totalList
-          this.total = res.total
-          this.isLoading = false
+          if (this.searchParams.pageNo > 1 && res.totalList.length === 0) {
+            this.searchParams.pageNo = this.searchParams.pageNo - 1
+          } else {
+            this.projectsList = []
+            this.projectsList = res.totalList
+            this.total = res.total
+            this.isLoading = false
+          }
         }).catch(e => {
           this.isLoading = false
         })

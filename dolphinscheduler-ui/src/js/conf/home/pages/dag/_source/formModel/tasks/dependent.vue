@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 <template>
-  <div class="dependence-model">
+  <div class="dependent-model">
     <m-list-box>
       <div slot="text">{{$t('Add dependency')}}</div>
       <div slot="content">
@@ -23,12 +23,8 @@
           <a href="javascript:"
              @click="!isDetails && _addDep()"
              class="add-dep">
-            <i v-if="!isLoading" class="iconfont" :class="_isDetails" data-toggle="tooltip" :title="$t('Add')">
-              &#xe636;
-            </i>
-            <i v-if="isLoading" class="iconfont fa fa-spin" data-toggle="tooltip" :title="$t('Add')">
-              &#xe6af;
-            </i>
+            <em v-if="!isLoading" class="el-icon-circle-plus-outline" :class="_isDetails" data-toggle="tooltip" :title="$t('Add')"></em>
+            <em v-if="isLoading" class="el-icon-loading as as-spin" data-toggle="tooltip" :title="$t('Add')"></em>
           </a>
         </div>
         <div class="dep-box">
@@ -44,14 +40,13 @@
                   @click="!isDetails && _setRelation($index)">
               {{el.relation === 'AND' ? $t('and') : $t('or')}}
             </span>
-            <i class="iconfont dep-delete"
+            <em class="el-icon-delete dep-delete"
                data-toggle="tooltip"
                data-container="body"
                :class="_isDetails"
                @click="!isDetails && _deleteDep($index)"
                :title="$t('delete')" >
-              &#xe611;
-            </i>
+            </em>
             <m-depend-item-list
               :dependTaskList='dependTaskList'
               v-model="el.dependItemList"
@@ -72,7 +67,7 @@
   import disabledState from '@/module/mixin/disabledState'
 
   export default {
-    name: 'dependence',
+    name: 'dependent',
     data () {
       return {
         relation: 'AND',
@@ -102,9 +97,9 @@
         $('body').find('.tooltip.fade.top.in').remove()
       },
       _onDeleteAll (i) {
-        this.dependTaskList.map((item,i)=>{
-          if(item.dependItemList.length === 0){
-            this.dependTaskList.splice(i,1)
+        this.dependTaskList.map((item, i) => {
+          if (item.dependItemList.length === 0) {
+            this.dependTaskList.splice(i, 1)
           }
         })
         // this._deleteDep(i)
@@ -112,7 +107,7 @@
       _setGlobalRelation () {
         this.relation = this.relation === 'AND' ? 'OR' : 'AND'
       },
-      getDependTaskList(i){
+      getDependTaskList (i) {
         // console.log('getDependTaskList',i)
       },
       _setRelation (i) {
@@ -136,6 +131,9 @@
         setTimeout(() => {
           this.isLoading = false
         }, 600)
+      },
+      cacheDependent (val) {
+        this.$emit('on-cache-dependent', val)
       }
     },
     beforeCreate () {
@@ -149,20 +147,34 @@
         this.dependTaskList = _.cloneDeep(o.dependence.dependTaskList) || []
         let defaultState = this.isDetails ? 'WAITING' : ''
         // Process instance return status display matches by key
-        _.map(this.dependTaskList, v => _.map(v.dependItemList, v1 => v1.state = dependentResult[`${v1.definitionId}-${v1.depTasks}-${v1.cycle}-${v1.dateValue}`] || defaultState))
+        _.map(this.dependTaskList, v => _.map(v.dependItemList, v1 => {
+          v1.state = dependentResult[`${v1.definitionId}-${v1.depTasks}-${v1.cycle}-${v1.dateValue}`] || defaultState
+        }))
       }
     },
     mounted () {
     },
     destroyed () {
     },
-    computed: {},
+    computed: {
+      cacheDependent () {
+        return {
+          relation: this.relation,
+          dependTaskList: _.map(this.dependTaskList, v => {
+            return {
+              relation: v.relation,
+              dependItemList: _.map(v.dependItemList, v1 => _.omit(v1, ['depTasksList', 'state', 'dateValueList']))
+            }
+          })
+        }
+      }
+    },
     components: { mListBox, mDependItemList }
   }
 </script>
 
 <style lang="scss" rel="stylesheet/scss">
-  .dependence-model {
+  .dependent-model {
     margin-top: -10px;
     .dep-opt {
       margin-bottom: 10px;

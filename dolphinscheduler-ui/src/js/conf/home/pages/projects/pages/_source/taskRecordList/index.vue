@@ -20,14 +20,23 @@
       <m-conditions @on-query="_onQuery"></m-conditions>
     </template>
     <template slot="content">
-      <template v-if="taskRecordList.length">
+      <template v-if="taskRecordList.length || total>0">
         <m-list :task-record-list="taskRecordList" @on-update="_onUpdate" :page-no="searchParams.pageNo" :page-size="searchParams.pageSize">
         </m-list>
         <div class="page-box">
-          <x-page :current="parseInt(searchParams.pageNo)" :total="total" show-elevator @on-change="_page"></x-page>
+          <el-pagination
+              background
+              @current-change="_page"
+              @size-change="_pageSize"
+              :page-size="searchParams.pageSize"
+              :current-page.sync="searchParams.pageNo"
+              :page-sizes="[10, 30, 50]"
+              layout="sizes, prev, pager, next, jumper"
+              :total="total">
+            </el-pagination>
         </div>
       </template>
-      <template v-if="!taskRecordList.length">
+      <template v-if="!taskRecordList.length && total<=0">
         <m-no-data></m-no-data>
       </template>
       <m-spin :is-spin="isLoading"></m-spin>
@@ -42,7 +51,6 @@
   import mSpin from '@/module/components/spin/spin'
   import mNoData from '@/module/components/noData/noData'
   import listUrlParamHandle from '@/module/mixin/listUrlParamHandle'
-  import mSecondaryMenu from '@/module/components/secondaryMenu/secondaryMenu'
   import mListConstruction from '@/module/components/listConstruction/listConstruction'
 
   export default {
@@ -110,6 +118,6 @@
     },
     mounted () {
     },
-    components: { mList, mConditions, mSpin, mListConstruction, mSecondaryMenu, mNoData }
+    components: { mList, mConditions, mSpin, mListConstruction, mNoData }
   }
 </script>

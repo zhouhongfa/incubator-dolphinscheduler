@@ -19,23 +19,34 @@
     <template slot="conditions">
       <m-conditions @on-conditions="_onConditions">
         <template slot="button-group">
-          <x-button type="ghost" size="small"  @click="_uploading">{{$t('Upload UDF Resources')}}</x-button>
+          <el-button-group>
+            <el-button size="mini"  @click="() => this.$router.push({name: 'resource-udf-createUdfFolder'})">{{$t('Create folder')}}</el-button>
+            <el-button size="mini"  @click="_uploading">{{$t('Upload UDF Resources')}}</el-button>
+          </el-button-group>
         </template>
       </m-conditions>
     </template>
     <template slot="content">
-      <template v-if="udfResourcesList.length">
-        <m-list :udf-resources-list="udfResourcesList" :page-no="searchParams.pageNo" :page-size="searchParams.pageSize">
+      <template v-if="udfResourcesList.length || total>0">
+        <m-list @on-update="_onUpdate" :udf-resources-list="udfResourcesList" :page-no="searchParams.pageNo" :page-size="searchParams.pageSize">
         </m-list>
         <div class="page-box">
-          <x-page :current="parseInt(searchParams.pageNo)" :total="total" :page-size="searchParams.pageSize" show-elevator @on-change="_page" show-sizer :page-size-options="[10,30,50]" @on-size-change="_pageSize"></x-page>
+          <el-pagination
+            background
+            @current-change="_page"
+            @size-change="_pageSize"
+            :page-size="searchParams.pageSize"
+            :current-page.sync="searchParams.pageNo"
+            :page-sizes="[10, 30, 50]"
+            layout="sizes, prev, pager, next, jumper"
+            :total="total">
+          </el-pagination>
         </div>
       </template>
-      <template v-if="!udfResourcesList.length">
+      <template v-if="!udfResourcesList.length && total<=0">
         <m-no-data></m-no-data>
       </template>
-      <m-spin :is-spin="isLoading">
-      </m-spin>
+      <m-spin :is-spin="isLoading" :is-left="isLeft"></m-spin>
     </template>
   </m-list-construction>
 </template>
@@ -58,11 +69,13 @@
         isLoading: false,
         udfResourcesList: [],
         searchParams: {
+          id: -1,
           pageSize: 10,
           pageNo: 1,
           searchVal: '',
           type: 'UDF'
-        }
+        },
+        isLeft: true
       }
     },
     mixins: [listUrlParamHandle],
@@ -85,18 +98,30 @@
       _pageSize (val) {
         this.searchParams.pageSize = val
       },
+      _onUpdate () {
+        this._debounceGET()
+      },
       _updateList () {
         this.searchParams.pageNo = 1
         this.searchParams.searchVal = ''
         this._debounceGET()
       },
       _getList (flag) {
+        if (sessionStorage.getItem('isLeft') === 0) {
+          this.isLeft = false
+        } else {
+          this.isLeft = true
+        }
         this.isLoading = !flag
         this.getResourcesListP(this.searchParams).then(res => {
-          this.udfResourcesList = []
-          this.udfResourcesList = res.totalList
-          this.total = res.total
-          this.isLoading = false
+          if (this.searchParams.pageNo > 1 && res.totalList.length === 0) {
+            this.searchParams.pageNo = this.searchParams.pageNo - 1
+          } else {
+            this.udfResourcesList = []
+            this.udfResourcesList = res.totalList
+            this.total = res.total
+            this.isLoading = false
+          }
         }).catch(e => {
           this.isLoading = false
         })
@@ -112,7 +137,9 @@
     created () {
     },
     mounted () {
-      this.$modal.destroy()
+    },
+    beforeDestroy () {
+      sessionStorage.setItem('isLeft', 1)
     },
     components: { mListConstruction, mConditions, mList, mSpin, mNoData }
   }

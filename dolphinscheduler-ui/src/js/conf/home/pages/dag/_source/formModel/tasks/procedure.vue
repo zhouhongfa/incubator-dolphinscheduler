@@ -30,13 +30,13 @@
     <m-list-box>
       <div slot="text">{{$t('methods')}}</div>
       <div slot="content">
-        <x-input
-                type="input"
-                :disabled="isDetails"
-                v-model="method"
-                :placeholder="$t('Please enter method(optional)')"
-                autocomplete="off">
-        </x-input>
+        <el-input
+            type="input"
+            size="small"
+            :disabled="isDetails"
+            v-model="method"
+            :placeholder="$t('Please enter method(optional)')">
+        </el-input>
       </div>
     </m-list-box>
     <m-list-box>
@@ -70,7 +70,9 @@
         // Data source type
         type: '',
         // data source
-        datasource: ''
+        datasource: '',
+        // Return to the selected data source
+        rtDatasource: ''
       }
     },
     mixins: [disabledState],
@@ -83,7 +85,7 @@
        */
       _onDsData (o) {
         this.type = o.type
-        this.datasource = o.datasource
+        this.rtDatasource = o.datasource
       },
       /**
        * return udp
@@ -112,14 +114,29 @@
         // storage
         this.$emit('on-params', {
           type: this.type,
-          datasource: this.datasource,
+          datasource: this.rtDatasource,
           method: this.method,
           localParams: this.localParams
         })
         return true
       }
     },
-    watch: {},
+    watch: {
+      // Watch the cacheParams
+      cacheParams (val) {
+        this.$emit('on-cache-params', val)
+      }
+    },
+    computed: {
+      cacheParams () {
+        return {
+          type: this.type,
+          datasource: this.rtDatasource,
+          method: this.method,
+          localParams: this.localParams
+        }
+      }
+    },
     created () {
       let o = this.backfillItem
 
@@ -145,6 +162,3 @@
     components: { mListBox, mDatasource, mLocalParams }
   }
 </script>
-
-<style lang="scss" rel="stylesheet/scss">
-</style>

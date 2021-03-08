@@ -16,27 +16,18 @@
  */
 <template>
   <div class="priority-model">
-    <x-select @on-change="_onChange" v-model="value" style="width: 130px;" :disabled="isDetails">
-      <div slot="trigger" slot-scope="{ selectedModel }" class="ans-input" >
-        <div class="input-element" :class="isDetails?'disabled' : ''">
-          <span v-html="_rtUnicode(selectedModel ? selectedModel.label : 'MEDIUM')"></span>
-          <span class="label-p">{{selectedModel ? selectedModel.label : 'MEDIUM'}}</span>
-          <i class="ans-icon-arrow-down" ></i>
-        </div>
-      </div>
-      <x-option
-              v-for="item in priorityList"
-              :key="item.code"
-              :value="item.code"
-              :label="item.code">
-        <li class="ans-option ans-option-listp">
-          <span class="default-option-class">
-            <i class="iconfont" v-html="item.unicode" :style="{color:item.color}"></i>
-            {{item.code}}
-          </span>
-        </li>
-      </x-option>
-    </x-select>
+    <el-select @change="_onChange" size="small" v-model="selectedValue" style="width: 130px;" :disabled="isDetails">
+    <el-option
+      v-for="item in priorityList"
+      :key="item.code"
+      :label="item.code"
+      :value="item.code">
+      <span class="default-option-class">
+        <em :class="item.unicode" :style="{color:item.color}"></em>
+        {{item.code}}
+      </span>
+    </el-option>
+  </el-select>
   </div>
 </template>
 <script>
@@ -47,30 +38,31 @@
     name: 'priority',
     data () {
       return {
+        selectedValue: this.value,
         priorityList: [
           {
             code: 'HIGHEST',
-            unicode: '&#xe632;',
+            unicode: 'el-icon-top',
             color: '#ff0000'
           },
           {
             code: 'HIGH',
-            unicode: '&#xe632;',
+            unicode: 'el-icon-top',
             color: '#ff0000'
           },
           {
             code: 'MEDIUM',
-            unicode: '&#xe632;',
+            unicode: 'el-icon-top',
             color: '#EA7D24'
           },
           {
             code: 'LOW',
-            unicode: '&#xeef8;',
+            unicode: 'el-icon-bottom',
             color: '#2A8734'
           },
           {
             code: 'LOWEST',
-            unicode: '&#xeef8;',
+            unicode: 'el-icon-bottom',
             color: '#2A8734'
           }
         ]
@@ -90,11 +82,15 @@
     methods: {
       _rtUnicode (value) {
         let o = _.find(this.priorityList, ['code', value])
-        return `<i class="iconfont" style="color:${o.color}">${o.unicode}</i>`
+        return `<em class="${o.unicode}" style="color:${o.color}"></em>`
       },
       _onChange (o) {
-        this.value = o.value
-        this.$emit('priorityEvent', o.value)
+        this.$emit('priorityEvent', o)
+      }
+    },
+    watch: {
+      value (val) {
+        this.selectedValue = val
       }
     },
     created () {

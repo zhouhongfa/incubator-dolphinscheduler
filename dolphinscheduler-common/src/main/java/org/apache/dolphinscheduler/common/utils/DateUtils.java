@@ -14,13 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.dolphinscheduler.common.utils;
 
 import org.apache.dolphinscheduler.common.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -28,12 +26,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * date utils
  */
 public class DateUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
+    private DateUtils() {
+        throw new UnsupportedOperationException("Construct DateUtils");
+    }
 
     /**
      * date to local datetime
@@ -90,7 +95,7 @@ public class DateUtils {
      * get the formatted date string
      *
      * @param localDateTime local data time
-     * @param format        yyyy-MM-dd HH:mm:ss
+     * @param format yyyy-MM-dd HH:mm:ss
      * @return date string
      */
     public static String format(LocalDateTime localDateTime, String format) {
@@ -107,12 +112,11 @@ public class DateUtils {
         return format(date, Constants.YYYY_MM_DD_HH_MM_SS);
     }
 
-
     /**
      * convert string to date and time
      *
      * @param date date
-     * @param format  format
+     * @param format format
      * @return date
      */
     public static Date parse(String date, String format) {
@@ -124,7 +128,6 @@ public class DateUtils {
         }
         return null;
     }
-
 
     /**
      * convert date str to yyyy-MM-dd HH:mm:ss format
@@ -144,7 +147,7 @@ public class DateUtils {
      * @return differ seconds
      */
     public static long differSec(Date d1, Date d2) {
-        if(d1 == null || d2 == null){
+        if (d1 == null || d2 == null) {
             return 0;
         }
         return (long) Math.ceil(differMs(d1, d2) / 1000.0);
@@ -160,7 +163,6 @@ public class DateUtils {
     public static long differMs(Date d1, Date d2) {
         return Math.abs(d1.getTime() - d2.getTime());
     }
-
 
     /**
      * get hours between two dates
@@ -184,7 +186,6 @@ public class DateUtils {
         return (long) Math.ceil(differSec(d1, d2) / 60.0);
     }
 
-
     /**
      * get the date of the specified date in the days before and after
      *
@@ -197,6 +198,18 @@ public class DateUtils {
         calendar.setTime(date);
         calendar.add(Calendar.DATE, day);
         return calendar.getTime();
+    }
+
+    /**
+     * get the hour of day.
+     *
+     * @param date date
+     * @return hour of day
+     */
+    public static int getHourIndex(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
     /**
@@ -228,19 +241,58 @@ public class DateUtils {
      */
     public static String format2Readable(long ms) {
 
-        long days = ms / (1000 * 60 * 60 * 24);
-        long hours = (ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
-        long minutes = (ms % (1000 * 60 * 60)) / (1000 * 60);
-        long seconds = (ms % (1000 * 60)) / 1000;
+        long days = MILLISECONDS.toDays(ms);
+        long hours = MILLISECONDS.toDurationHours(ms);
+        long minutes = MILLISECONDS.toDurationMinutes(ms);
+        long seconds = MILLISECONDS.toDurationSeconds(ms);
 
         return String.format("%02d %02d:%02d:%02d", days, hours, minutes, seconds);
 
     }
 
     /**
-     * get monday
      *
+     * format time to duration
+     *
+     * @param d1 d1
+     * @param d2 d2
+     * @return format time
+     */
+    public static String format2Duration(Date d1, Date d2) {
+        if (d1 == null || d2 == null) {
+            return null;
+        }
+        return format2Duration(differMs(d1, d2));
+    }
+
+    /**
+     * format time to duration
+     *
+     * @param ms ms
+     * @return format time
+     */
+    public static String format2Duration(long ms) {
+
+        long days = MILLISECONDS.toDays(ms);
+        long hours = MILLISECONDS.toDurationHours(ms);
+        long minutes = MILLISECONDS.toDurationMinutes(ms);
+        long seconds = MILLISECONDS.toDurationSeconds(ms);
+
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder = days > 0 ? strBuilder.append(days).append("d").append(" ") : strBuilder;
+        strBuilder = hours > 0 ? strBuilder.append(hours).append("h").append(" ") : strBuilder;
+        strBuilder = minutes > 0 ? strBuilder.append(minutes).append("m").append(" ") : strBuilder;
+        strBuilder = seconds > 0 ? strBuilder.append(seconds).append("s") : strBuilder;
+
+        return strBuilder.toString();
+
+    }
+
+    /**
+     * get monday
+     * <p>
      * note: Set the first day of the week to Monday, the default is Sunday
+     *
      * @param date date
      * @return get monday
      */
@@ -257,8 +309,9 @@ public class DateUtils {
 
     /**
      * get sunday
-     *
+     * <p>
      * note: Set the first day of the week to Monday, the default is Sunday
+     *
      * @param date date
      * @return get sunday
      */
@@ -277,7 +330,7 @@ public class DateUtils {
      *
      * @param date date
      * @return first day of month
-     * */
+     */
     public static Date getFirstDayOfMonth(Date date) {
         Calendar cal = Calendar.getInstance();
 
@@ -291,14 +344,14 @@ public class DateUtils {
      * get some hour of day
      *
      * @param date date
-     * @param hours hours
+     * @param offsetHour hours
      * @return some hour of day
-     * */
-    public static Date getSomeHourOfDay(Date date, int hours) {
+     */
+    public static Date getSomeHourOfDay(Date date, int offsetHour) {
         Calendar cal = Calendar.getInstance();
 
         cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, cal.get(Calendar.HOUR_OF_DAY) - hours);
+        cal.set(Calendar.HOUR_OF_DAY, cal.get(Calendar.HOUR_OF_DAY) + offsetHour);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
@@ -309,8 +362,8 @@ public class DateUtils {
     /**
      * get last day of month
      *
-     * @param  date date
-     * @return  get last day of month
+     * @param date date
+     * @return get last day of month
      */
     public static Date getLastDayOfMonth(Date date) {
         Calendar cal = Calendar.getInstance();
@@ -388,10 +441,98 @@ public class DateUtils {
 
     /**
      * get current date
+     *
      * @return current date
      */
     public static Date getCurrentDate() {
         return DateUtils.parse(DateUtils.getCurrentTime(),
                 Constants.YYYY_MM_DD_HH_MM_SS);
     }
+
+    /**
+     * get date
+     *
+     * @param date date
+     * @param calendarField calendarField
+     * @param amount amount
+     * @return date
+     */
+    public static Date add(final Date date, final int calendarField, final int amount) {
+        if (date == null) {
+            throw new IllegalArgumentException("The date must not be null");
+        }
+        final Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(calendarField, amount);
+        return c.getTime();
+    }
+
+    /**
+     * starting from the current time, get how many seconds are left before the target time.
+     * targetTime = baseTime + intervalSeconds
+     *
+     * @param baseTime base time
+     * @param intervalSeconds a period of time
+     * @return the number of seconds
+     */
+    public static long getRemainTime(Date baseTime, long intervalSeconds) {
+        if (baseTime == null) {
+            return 0;
+        }
+        long usedTime = (System.currentTimeMillis() - baseTime.getTime()) / 1000;
+        return intervalSeconds - usedTime;
+    }
+
+    /**
+     * get current time stamp : yyyyMMddHHmmssSSS
+     *
+     * @return date string
+     */
+    public static String getCurrentTimeStamp() {
+        return getCurrentTime(Constants.YYYYMMDDHHMMSSSSS);
+    }
+
+    static final long C0 = 1L;
+    static final long C1 = C0 * 1000L;
+    static final long C2 = C1 * 1000L;
+    static final long C3 = C2 * 1000L;
+    static final long C4 = C3 * 60L;
+    static final long C5 = C4 * 60L;
+    static final long C6 = C5 * 24L;
+
+    /**
+     * Time unit representing one thousandth of a second
+     */
+    public static class MILLISECONDS {
+
+        public static long toSeconds(long d) {
+            return d / (C3 / C2);
+        }
+
+        public static long toMinutes(long d) {
+            return d / (C4 / C2);
+        }
+
+        public static long toHours(long d)   {
+            return d / (C5 / C2);
+        }
+
+        public static long toDays(long d)    {
+            return d / (C6 / C2);
+        }
+
+        public static long toDurationSeconds(long d)   {
+            return (d % (C4 / C2)) / (C3 / C2);
+        }
+
+        public static long toDurationMinutes(long d)   {
+            return (d % (C5 / C2)) / (C4 / C2);
+        }
+
+        public static long toDurationHours(long d)   {
+            return (d % (C6 / C2)) / (C5 / C2);
+        }
+
+    }
+
 }

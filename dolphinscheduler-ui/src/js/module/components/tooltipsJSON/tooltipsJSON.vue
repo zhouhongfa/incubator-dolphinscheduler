@@ -16,14 +16,14 @@
  */
 <template>
   <div class="tooltips-model">
-    <x-poptip
-            trigger="click"
-            placement="bottom-start">
+    <el-popover
+      placement="top-start"
+      trigger="click">
       <pre :id="'result-' + id" class="result"></pre>
-      <i class="iconfont" slot="reference">
+      <em class="iconfont" slot="reference">
         <slot name="reference"></slot>
-      </i>
-    </x-poptip>
+      </em>
+    </el-popover>
   </div>
 </template>
 <script>
@@ -45,7 +45,7 @@
 </script>
 
 <style lang="scss" rel="stylesheet/scss">
-  .tooltips-model {
+  .el-popover {
     .result {
       border: 0;
       padding: 5px;

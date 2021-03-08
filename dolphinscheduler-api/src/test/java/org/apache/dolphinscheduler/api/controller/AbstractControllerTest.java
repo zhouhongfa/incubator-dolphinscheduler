@@ -14,17 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.dolphinscheduler.api.controller;
 
 import org.apache.dolphinscheduler.api.ApiApplicationServer;
 import org.apache.dolphinscheduler.api.service.SessionService;
 import org.apache.dolphinscheduler.common.enums.UserType;
+import org.apache.dolphinscheduler.common.utils.StringUtils;
 import org.apache.dolphinscheduler.dao.entity.User;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.*;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -32,14 +35,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
+/**
+ * abstract controller test
+ */
 @Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiApplicationServer.class)
 public class AbstractControllerTest {
-    private static Logger logger = LoggerFactory.getLogger(AbstractControllerTest.class);
+
     public static final String SESSION_ID = "sessionId";
 
     protected MockMvc mockMvc;
@@ -51,6 +54,7 @@ public class AbstractControllerTest {
     private SessionService sessionService;
 
     protected User user;
+
     protected String sessionId;
 
     @Before
@@ -59,12 +63,10 @@ public class AbstractControllerTest {
         createSession();
     }
 
-
     @After
     public void after(){
         sessionService.signOut("127.0.0.1", user);
     }
-
 
     private void createSession(){
 

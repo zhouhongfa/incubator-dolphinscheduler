@@ -14,110 +14,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.dolphinscheduler.dao.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
 import org.apache.dolphinscheduler.common.enums.AlertStatus;
-import org.apache.dolphinscheduler.common.enums.AlertType;
-import org.apache.dolphinscheduler.common.enums.ShowType;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *  alert
- */
-@Data
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
 @TableName("t_ds_alert")
 public class Alert {
-
     /**
-     * id
+     * primary key
      */
-    @TableId(value="id", type=IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private int id;
-
     /**
      * title
      */
+    @TableField(value = "title")
     private String title;
 
     /**
-     * show type
-     */
-    private ShowType showType;
-    /**
      * content
      */
+    @TableField(value = "content")
     private String content;
 
     /**
-     * alert type
+     * alert_status
      */
-    private AlertType alertType;
-
-
-
-    /**
-     * alert status
-     */
+    @TableField(value = "alert_status")
     private AlertStatus alertStatus;
-
     /**
      * log
      */
+    @TableField(value = "log")
     private String log;
-
     /**
-     * alert group id
+     * alertgroup_id
      */
     @TableField("alertgroup_id")
     private int alertGroupId;
 
-
     /**
-     * receivers
+     * create_time
      */
-    private String receivers;
-
-    /**
-     * receivers cc
-     */
-    private String receiversCc;
-
-    /**
-     * create time
-     */
+    @TableField("create_time")
     private Date createTime;
-
     /**
-     * update time
+     * update_time
      */
+    @TableField("update_time")
     private Date updateTime;
-
-
     @TableField(exist = false)
-    private Map<String,Object> info = new HashMap<>();
-
-    public Map<String, Object> getInfo() {
-        return info;
-    }
-
-    public void setInfo(Map<String, Object> info) {
-        this.info = info;
-    }
+    private Map<String, Object> info = new HashMap<>();
 
     public Alert() {
-    }
-
-    public Alert(int id, String title) {
-        this.id = id;
-        this.title = title;
     }
 
     public int getId() {
@@ -136,14 +95,6 @@ public class Alert {
         this.title = title;
     }
 
-    public ShowType getShowType() {
-        return showType;
-    }
-
-    public void setShowType(ShowType showType) {
-        this.showType = showType;
-    }
-
     public String getContent() {
         return content;
     }
@@ -151,15 +102,6 @@ public class Alert {
     public void setContent(String content) {
         this.content = content;
     }
-
-    public AlertType getAlertType() {
-        return alertType;
-    }
-
-    public void setAlertType(AlertType alertType) {
-        this.alertType = alertType;
-    }
-
 
     public AlertStatus getAlertStatus() {
         return alertStatus;
@@ -189,22 +131,6 @@ public class Alert {
         return createTime;
     }
 
-    public String getReceivers() {
-        return receivers;
-    }
-
-    public void setReceivers(String receivers) {
-        this.receivers = receivers;
-    }
-
-    public String getReceiversCc() {
-        return receiversCc;
-    }
-
-    public void setReceiversCc(String receiversCc) {
-        this.receiversCc = receiversCc;
-    }
-
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
@@ -217,22 +143,88 @@ public class Alert {
         this.updateTime = updateTime;
     }
 
+    public Map<String, Object> getInfo() {
+        return info;
+    }
+
+    public void setInfo(Map<String, Object> info) {
+        this.info = info;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Alert alert = (Alert) o;
+
+        if (id != alert.id) {
+            return false;
+        }
+        if (alertGroupId != alert.alertGroupId) {
+            return false;
+        }
+        if (!title.equals(alert.title)) {
+            return false;
+        }
+        if (!content.equals(alert.content)) {
+            return false;
+        }
+        if (alertStatus != alert.alertStatus) {
+            return false;
+        }
+        if (!log.equals(alert.log)) {
+            return false;
+        }
+        if (!createTime.equals(alert.createTime)) {
+            return false;
+        }
+        return updateTime.equals(alert.updateTime) && info.equals(alert.info);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + title.hashCode();
+        result = 31 * result + content.hashCode();
+        result = 31 * result + alertStatus.hashCode();
+        result = 31 * result + log.hashCode();
+        result = 31 * result + alertGroupId;
+        result = 31 * result + createTime.hashCode();
+        result = 31 * result + updateTime.hashCode();
+        result = 31 * result + info.hashCode();
+        return result;
+    }
+
     @Override
     public String toString() {
-        return "Alert{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", showType=" + showType +
-                ", content='" + content + '\'' +
-                ", alertType=" + alertType +
-                ", alertStatus=" + alertStatus +
-                ", log='" + log + '\'' +
-                ", alertGroupId=" + alertGroupId +
-                ", createTime=" + createTime +
-                ", updateTime=" + updateTime +
-                ", receivers='" + receivers + '\'' +
-                ", receiversCc='" + receiversCc + '\'' +
-                ", info=" + info +
-                '}';
+        return "Alert{"
+                + "id="
+                + id
+                + ", title='"
+                + title + '\''
+                + ", content='"
+                + content
+                + '\''
+                + ", alertStatus="
+                + alertStatus
+                + ", log='"
+                + log
+                + '\''
+                + ", alertGroupId="
+                + alertGroupId
+                + '\''
+                + ", createTime="
+                + createTime
+                + ", updateTime="
+                + updateTime
+                + ", info="
+                + info
+                + '}';
     }
 }

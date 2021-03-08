@@ -14,11 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.dolphinscheduler.api.controller;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.apache.dolphinscheduler.api.enums.Status;
 import org.apache.dolphinscheduler.api.utils.Result;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,11 +35,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * queue controller test
  */
@@ -41,7 +43,7 @@ public class QueueControllerTest extends AbstractControllerTest{
     private static Logger logger = LoggerFactory.getLogger(QueueControllerTest.class);
 
     @Test
-    public void queryList() throws Exception {
+    public void testQueryList() throws Exception {
 
         MvcResult mvcResult = mockMvc.perform(get("/queue/list")
                 .header(SESSION_ID, sessionId))
@@ -55,7 +57,7 @@ public class QueueControllerTest extends AbstractControllerTest{
     }
 
     @Test
-    public void queryPagingList() throws Exception {
+    public void testQueryQueueListPaging() throws Exception {
 
         MultiValueMap<String, String> paramsMap = new LinkedMultiValueMap<>();
         //paramsMap.add("processInstanceId","1380");
@@ -74,8 +76,11 @@ public class QueueControllerTest extends AbstractControllerTest{
         logger.info(mvcResult.getResponse().getContentAsString());
     }
 
+
+
+
     @Test
-    public void createQueue() throws Exception {
+    public void testCreateQueue() throws Exception {
 
         MultiValueMap<String, String> paramsMap = new LinkedMultiValueMap<>();
         paramsMap.add("queue","ait");
@@ -90,12 +95,10 @@ public class QueueControllerTest extends AbstractControllerTest{
         Result result = JSONUtils.parseObject(mvcResult.getResponse().getContentAsString(), Result.class);
 //        Assert.assertEquals(Status.SUCCESS.getCode(),result.getCode().intValue());
         logger.info(mvcResult.getResponse().getContentAsString());
-
-
     }
 
     @Test
-    public void updateQueue() throws Exception {
+    public void testUpdateQueue() throws Exception {
 
         MultiValueMap<String, String> paramsMap = new LinkedMultiValueMap<>();
         paramsMap.add("id","2");
@@ -114,7 +117,7 @@ public class QueueControllerTest extends AbstractControllerTest{
     }
 
     @Test
-    public void verifyQueue() throws Exception {
+    public void testVerifyQueue() throws Exception {
 
         MultiValueMap<String, String> paramsMap = new LinkedMultiValueMap<>();
         paramsMap.add("queue","ait123");

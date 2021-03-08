@@ -30,8 +30,8 @@
             </div>
             <div class="value-p">
               <span class="state">
-                <i class="iconfont success" v-if="item.state">&#xe607;</i>
-                <i class="iconfont error" v-else>&#xe626;</i>
+                <em class="el-icon-success success" v-if="item.state"></em>
+                <em class="el-icon-error error" v-else></em>
               </span>
             </div>
             <div class="text-1">{{$t('Health status')}}</div>
@@ -43,7 +43,7 @@
               <span>{{$t('Max connections')}} - {{item.date | formatDate}}</span>
             </div>
             <div class="value-p">
-              <b :style="{color:color[0]}">{{item.maxConnections}}</b>
+              <strong :style="{color:color[0]}">{{item.maxConnections}}</strong>
             </div>
             <div class="text-1">{{$t('Max connections')}}</div>
           </div>
@@ -54,31 +54,18 @@
               <span>{{$t('Threads connections')}}</span>
             </div>
             <div class="value-p">
-              <b :style="{color:color[8]}">{{item.threadsConnections}}</b>
+              <strong :style="{color:color[8]}">{{item.threadsConnections}}</strong>
             </div>
             <div class="text-1">{{$t('Threads connections')}}</div>
           </div>
         </div>
-        <!-- <div class="col-md-2">
-            <div class="text-num-model text">
-              <div class="title">
-                <span>{{$t('Max used connections')}}</span>
-              </div>
-              <div class="value-p">
-                <b :style="{color:color[2]}">{{item.maxUsedConnections}}</b>
-              </div>
-              <div class="text-1">
-                {{$t('Max used connections')}}
-              </div>
-            </div>
-        </div>-->
         <div class="col-md-3">
           <div class="text-num-model text">
             <div class="title">
               <span>{{$t('Threads running connections')}}</span>
             </div>
             <div class="value-p">
-              <b :style="{color:color[4]}">{{item.threadsRunningConnections}}</b>
+              <strong :style="{color:color[4]}">{{item.threadsRunningConnections}}</strong>
             </div>
             <div class="text-1">{{$t('Threads running connections')}}</div>
           </div>
@@ -92,41 +79,39 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
-import mList from "./_source/zookeeperList";
-import mSpin from "@/module/components/spin/spin";
-import mNoData from "@/module/components/noData/noData";
-import themeData from "@/module/echarts/themeData.json";
-import mListConstruction from "@/module/components/listConstruction/listConstruction";
+  import { mapActions } from 'vuex'
+  import mSpin from '@/module/components/spin/spin'
+  import mNoData from '@/module/components/noData/noData'
+  import themeData from '@/module/echarts/themeData.json'
 
-export default {
-  name: "servers-mysql",
-  data() {
-    return {
-      isLoading: false,
-      mysqlList: [],
-      color: themeData.color
-    };
-  },
-  props: {},
-  methods: {
-    ...mapActions("monitor", ["getDatabaseData"])
-  },
-  watch: {},
-  created() {
-    this.isLoading = true;
-    this.getDatabaseData()
-      .then(res => {
-        this.mysqlList = res;
-        this.isLoading = false;
-      })
-      .catch(() => {
-        this.isLoading = false;
-      });
-  },
-  mounted() {},
-  components: { mList, mListConstruction, mSpin, mNoData }
-};
+  export default {
+    name: 'servers-mysql',
+    data () {
+      return {
+        isLoading: false,
+        mysqlList: [],
+        color: themeData.color
+      }
+    },
+    props: {},
+    methods: {
+      ...mapActions('monitor', ['getDatabaseData'])
+    },
+    watch: {},
+    created () {
+      this.isLoading = true
+      this.getDatabaseData()
+        .then(res => {
+          this.mysqlList = res
+          this.isLoading = false
+        })
+        .catch(() => {
+          this.isLoading = false
+        })
+    },
+    mounted () {},
+    components: { mSpin, mNoData }
+  }
 </script>
 <style lang="scss" rel="stylesheet/scss">
 @import "./servers";

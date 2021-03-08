@@ -14,51 +14,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dolphinscheduler.dao.entity;
 
-import org.apache.dolphinscheduler.common.enums.AlertType;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+package org.apache.dolphinscheduler.dao.entity;
 
 import java.util.Date;
 
-@Data
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
 @TableName("t_ds_alertgroup")
 public class AlertGroup {
-
-
     /**
      * primary key
      */
-    @TableId(value="id", type=IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private int id;
-
     /**
-     * alert group name
+     * group_name
      */
+    @TableField(value = "group_name")
     private String groupName;
 
-    /**
-     * alert group type
-     */
-    private AlertType groupType;
+    @TableField(value = "alert_instance_ids")
+    private String alertInstanceIds;
 
     /**
-     * alert group description
+     * description
      */
+    @TableField(value = "description")
     private String description;
-
     /**
-     * create time
+     * create_time
      */
+    @TableField(value = "create_time")
     private Date createTime;
+    /**
+     * update_time
+     */
+    @TableField(value = "update_time")
+    private Date updateTime;
 
     /**
-     * update time
+     * create_user_id
      */
-    private Date updateTime;
+    @TableField(value = "create_user_id")
+    private int createUserId;
 
     public int getId() {
         return id;
@@ -74,14 +76,6 @@ public class AlertGroup {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
-    }
-
-    public AlertType getGroupType() {
-        return groupType;
-    }
-
-    public void setGroupType(AlertType groupType) {
-        this.groupType = groupType;
     }
 
     public Date getCreateTime() {
@@ -108,6 +102,22 @@ public class AlertGroup {
         this.description = description;
     }
 
+    public int getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(int createUserId) {
+        this.createUserId = createUserId;
+    }
+
+    public String getAlertInstanceIds() {
+        return alertInstanceIds;
+    }
+
+    public void setAlertInstanceIds(String alertInstanceIds) {
+        this.alertInstanceIds = alertInstanceIds;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -122,10 +132,13 @@ public class AlertGroup {
         if (id != that.id) {
             return false;
         }
+        if (createUserId != that.createUserId) {
+            return false;
+        }
         if (groupName != null ? !groupName.equals(that.groupName) : that.groupName != null) {
             return false;
         }
-        if (groupType != that.groupType) {
+        if (alertInstanceIds != null ? !alertInstanceIds.equals(that.alertInstanceIds) : that.alertInstanceIds != null) {
             return false;
         }
         if (description != null ? !description.equals(that.description) : that.description != null) {
@@ -138,11 +151,24 @@ public class AlertGroup {
     @Override
     public int hashCode() {
         int result = id;
+        result = 31 * result + createUserId;
         result = 31 * result + (groupName != null ? groupName.hashCode() : 0);
-        result = 31 * result + (groupType != null ? groupType.hashCode() : 0);
+        result = 31 * result + (alertInstanceIds != null ? alertInstanceIds.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (createTime != null ? createTime.hashCode() : 0);
         result = 31 * result + (updateTime != null ? updateTime.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "AlertGroup{"
+            + "id=" + id
+            + "createUserId=" + createUserId
+            + ", groupName='" + groupName + '\''
+            + ", description='" + description + '\''
+            + ", createTime=" + createTime
+            + ", updateTime=" + updateTime
+            + '}';
     }
 }

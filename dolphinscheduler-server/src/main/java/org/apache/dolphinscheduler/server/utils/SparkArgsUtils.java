@@ -14,22 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dolphinscheduler.server.utils;
 
+package org.apache.dolphinscheduler.server.utils;
 
 import org.apache.dolphinscheduler.common.Constants;
 import org.apache.dolphinscheduler.common.enums.ProgramType;
+import org.apache.dolphinscheduler.common.process.ResourceInfo;
 import org.apache.dolphinscheduler.common.task.spark.SparkParameters;
-import org.apache.commons.lang.StringUtils;
+import org.apache.dolphinscheduler.common.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- *  spark args utils
+ * spark args utils
  */
 public class SparkArgsUtils {
+
+    private static final String SPARK_CLUSTER = "cluster";
+
+    private static final String SPARK_LOCAL = "local";
+
+    private static final String SPARK_ON_YARN = "yarn";
 
     /**
      * build args
@@ -39,77 +45,83 @@ public class SparkArgsUtils {
      */
     public static List<String> buildArgs(SparkParameters param) {
         List<String> args = new ArrayList<>();
-        String deployMode = "cluster";
+        String deployMode = SPARK_CLUSTER;
 
         args.add(Constants.MASTER);
-        if(StringUtils.isNotEmpty(param.getDeployMode())){
+        if (StringUtils.isNotEmpty(param.getDeployMode())) {
             deployMode = param.getDeployMode();
 
         }
-        if(!"local".equals(deployMode)){
-            args.add("yarn");
+        if (!SPARK_LOCAL.equals(deployMode)) {
+            args.add(SPARK_ON_YARN);
             args.add(Constants.DEPLOY_MODE);
         }
 
         args.add(param.getDeployMode());
 
-        if(param.getProgramType() !=null ){
-            if(param.getProgramType()!=ProgramType.PYTHON){
-                if (StringUtils.isNotEmpty(param.getMainClass())) {
-                    args.add(Constants.MAIN_CLASS);
-                    args.add(param.getMainClass());
-                }
-            }
+        ProgramType type = param.getProgramType();
+        String mainClass = param.getMainClass();
+        if (type != null && type != ProgramType.PYTHON && StringUtils.isNotEmpty(mainClass)) {
+            args.add(Constants.MAIN_CLASS);
+            args.add(mainClass);
         }
 
-
-        if (param.getDriverCores() != 0) {
+        int driverCores = param.getDriverCores();
+        if (driverCores != 0) {
             args.add(Constants.DRIVER_CORES);
-            args.add(String.format("%d", param.getDriverCores()));
+            args.add(String.format("%d", driverCores));
         }
 
-        if (StringUtils.isNotEmpty(param.getDriverMemory())) {
+        String driverMemory = param.getDriverMemory();
+        if (StringUtils.isNotEmpty(driverMemory)) {
             args.add(Constants.DRIVER_MEMORY);
-            args.add(param.getDriverMemory());
+            args.add(driverMemory);
         }
 
-        if (param.getNumExecutors() != 0) {
+        int numExecutors = param.getNumExecutors();
+        if (numExecutors != 0) {
             args.add(Constants.NUM_EXECUTORS);
-            args.add(String.format("%d", param.getNumExecutors()));
+            args.add(String.format("%d", numExecutors));
         }
 
-        if (param.getExecutorCores() != 0) {
+        int executorCores = param.getExecutorCores();
+        if (executorCores != 0) {
             args.add(Constants.EXECUTOR_CORES);
-            args.add(String.format("%d", param.getExecutorCores()));
+            args.add(String.format("%d", executorCores));
         }
 
-        if (StringUtils.isNotEmpty(param.getExecutorMemory())) {
+        String executorMemory = param.getExecutorMemory();
+        if (StringUtils.isNotEmpty(executorMemory)) {
             args.add(Constants.EXECUTOR_MEMORY);
-            args.add(param.getExecutorMemory());
+            args.add(executorMemory);
         }
 
         // --files --conf --libjar ...
-        if (StringUtils.isNotEmpty(param.getOthers())) {
-            String others = param.getOthers();
-            if(!others.contains("--queue")){
-                if (StringUtils.isNotEmpty(param.getQueue())) {
-                    args.add(Constants.SPARK_QUEUE);
-                    args.add(param.getQueue());
-                }
+        String others = param.getOthers();
+        String queue = param.getQueue();
+        if (StringUtils.isNotEmpty(others)) {
+
+            if (!others.contains(Constants.SPARK_QUEUE) && StringUtils.isNotEmpty(queue)) {
+                args.add(Constants.SPARK_QUEUE);
+                args.add(queue);
             }
-            args.add(param.getOthers());
-        }else if (StringUtils.isNotEmpty(param.getQueue())) {
+
+            args.add(others);
+
+        } else if (StringUtils.isNotEmpty(queue)) {
             args.add(Constants.SPARK_QUEUE);
-            args.add(param.getQueue());
+            args.add(queue);
 
         }
 
-        if (param.getMainJar() != null) {
-            args.add(param.getMainJar().getRes());
+        ResourceInfo mainJar = param.getMainJar();
+        if (mainJar != null) {
+            args.add(mainJar.getRes());
         }
 
-        if (StringUtils.isNotEmpty(param.getMainArgs())) {
-            args.add(param.getMainArgs());
+        String mainArgs = param.getMainArgs();
+        if (StringUtils.isNotEmpty(mainArgs)) {
+            args.add(mainArgs);
         }
 
         return args;

@@ -16,132 +16,169 @@
  */
 <template>
   <div class="datasource-popup-model">
-    <div class="top-p">
-      <span>{{item ? `${$t('Edit')}` : `${$t('Create')}`}}{{`${$t('Datasource')}`}}</span>
-    </div>
     <div class="content-p">
       <div class="create-datasource-model">
         <m-list-box-f>
-          <template slot="name"><b>*</b>{{$t('Datasource')}}</template>
-          <template slot="content">
-            <x-radio-group v-model="type" size="small">
-              <x-radio :label="'MYSQL'">MYSQL</x-radio>
-              <x-radio :label="'POSTGRESQL'">POSTGRESQL</x-radio>
-              <x-radio :label="'HIVE'">HIVE/IMPALA</x-radio>
-              <x-radio :label="'SPARK'">SPARK</x-radio>
-              <x-radio :label="'CLICKHOUSE'">CLICKHOUSE</x-radio>
-              <x-radio :label="'ORACLE'">ORACLE</x-radio>
-              <x-radio :label="'SQLSERVER'">SQLSERVER</x-radio>
-              <x-radio :label="'DB2'" class="radio-label-last" >DB2</x-radio>
-            </x-radio-group>
+          <template slot="name"><strong>*</strong>{{$t('Datasource')}}</template>
+          <template slot="content" size="small">
+              <el-select style="width: 100%;" v-model="type">
+                <el-option v-for="item in datasourceTypeList" :key="item.value" :value="item.value" :label="item.label">
+                </el-option>
+              </el-select>
           </template>
         </m-list-box-f>
         <m-list-box-f>
-          <template slot="name"><b>*</b>{{$t('Datasource Name')}}</template>
+          <template slot="name"><strong>*</strong>{{$t('Datasource Name')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="input"
                     v-model="name"
-                    :placeholder="$t('Please enter datasource name')"
-                    autocomplete="off">
-            </x-input>
+                    maxlength="60"
+                    size="small"
+                    :placeholder="$t('Please enter datasource name')">
+            </el-input>
           </template>
         </m-list-box-f>
         <m-list-box-f>
           <template slot="name">{{$t('Description')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="textarea"
                     v-model="note"
-                    :placeholder="$t('Please enter description')"
-                    autocomplete="off">
-            </x-input>
+                    size="small"
+                    :placeholder="$t('Please enter description')">
+            </el-input>
           </template>
         </m-list-box-f>
         <m-list-box-f>
-          <template slot="name"><b>*</b>{{$t('IP')}}</template>
+          <template slot="name"><strong>*</strong>{{$t('IP')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="input"
                     v-model="host"
-                    :placeholder="$t('Please enter IP')"
-                    autocomplete="off">
-            </x-input>
+                    maxlength="60"
+                    size="small"
+                    :placeholder="$t('Please enter IP')">
+            </el-input>
           </template>
         </m-list-box-f>
         <m-list-box-f>
-          <template slot="name"><b>*</b>{{$t('Port')}}</template>
+          <template slot="name"><strong>*</strong>{{$t('Port')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="input"
                     v-model="port"
-                    :placeholder="$t('Please enter port')"
-                    autocomplete="off">
-            </x-input>
+                    size="small"
+                    :placeholder="$t('Please enter port')">
+            </el-input>
           </template>
         </m-list-box-f>
         <m-list-box-f :class="{hidden:showPrincipal}">
-          <template slot="name"><b>*</b>Principal</template>
+          <template slot="name"><strong>*</strong>Principal</template>
           <template slot="content">
-            <x-input
+            <el-input
               type="input"
               v-model="principal"
-              :placeholder="$t('Please enter Principal')"
-              autocomplete="off">
-            </x-input>
+              size="small"
+              :placeholder="$t('Please enter Principal')">
+            </el-input>
+          </template>
+        </m-list-box-f>
+        <m-list-box-f :class="{hidden:showPrincipal}">
+          <template slot="name">krb5.conf</template>
+          <template slot="content">
+            <el-input
+              type="input"
+              v-model="javaSecurityKrb5Conf"
+              size="small"
+              :placeholder="$t('Please enter the kerberos authentication parameter java.security.krb5.conf')">
+            </el-input>
+          </template>
+        </m-list-box-f>
+        <m-list-box-f :class="{hidden:showPrincipal}">
+          <template slot="name">keytab.username</template>
+          <template slot="content">
+            <el-input
+              type="input"
+              v-model="loginUserKeytabUsername"
+              size="small"
+              :placeholder="$t('Please enter the kerberos authentication parameter login.user.keytab.username')">
+            </el-input>
+          </template>
+        </m-list-box-f>
+        <m-list-box-f :class="{hidden:showPrincipal}">
+          <template slot="name">keytab.path</template>
+          <template slot="content">
+            <el-input
+              type="input"
+              v-model="loginUserKeytabPath"
+              size="small"
+              :placeholder="$t('Please enter the kerberos authentication parameter login.user.keytab.path')">
+            </el-input>
           </template>
         </m-list-box-f>
         <m-list-box-f>
-          <template slot="name"><b>*</b>{{$t('User Name')}}</template>
+          <template slot="name"><strong>*</strong>{{$t('User Name')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="input"
                     v-model="userName"
-                    :placeholder="$t('Please enter user name')"
-                    autocomplete="off">
-            </x-input>
+                    maxlength="60"
+                    size="small"
+                    :placeholder="$t('Please enter user name')">
+            </el-input>
           </template>
         </m-list-box-f>
         <m-list-box-f>
           <template slot="name">{{$t('Password')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="password"
                     v-model="password"
-                    :placeholder="$t('Please enter your password')"
-                    autocomplete="off">
-            </x-input>
+                    size="small"
+                    :placeholder="$t('Please enter your password')">
+            </el-input>
           </template>
         </m-list-box-f>
         <m-list-box-f>
-          <template slot="name"><b :class="{hidden:showdDatabase}">*</b>{{$t('Database Name')}}</template>
+          <template slot="name"><strong :class="{hidden:showDatabase}">*</strong>{{$t('Database Name')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="input"
                     v-model="database"
-                    :placeholder="$t('Please enter database name')"
-                    autocomplete="off">
-            </x-input>
+                    maxlength="60"
+                    size="small"
+                    :placeholder="$t('Please enter database name')">
+            </el-input>
+          </template>
+        </m-list-box-f>
+        <m-list-box-f v-if="showConnectType">
+          <template slot="name"><strong>*</strong>{{$t('Oracle Connect Type')}}</template>
+          <template slot="content">
+            <el-radio-group v-model="connectType" size="small" style="vertical-align: sub;">
+              <el-radio :label="'ORACLE_SERVICE_NAME'">{{$t('Oracle Service Name')}}</el-radio>
+              <el-radio :label="'ORACLE_SID'">{{$t('Oracle SID')}}</el-radio>
+            </el-radio-group>
           </template>
         </m-list-box-f>
         <m-list-box-f>
           <template slot="name">{{$t('jdbc connect parameters')}}</template>
           <template slot="content">
-            <x-input
+            <el-input
                     type="textarea"
                     v-model="other"
                     :autosize="{minRows:2}"
-                    :placeholder="_rtOtherPlaceholder()"
-                    autocomplete="off">
-            </x-input>
+                    size="small"
+                    :placeholder="_rtOtherPlaceholder()">
+            </el-input>
           </template>
         </m-list-box-f>
       </div>
     </div>
     <div class="bottom-p">
-      <x-button type="text" @click="_close()"> {{$t('Cancel')}} </x-button>
-      <x-button type="success" shape="circle" @click="_testConnect()" :loading="testLoading">{{testLoading ? 'Loading...' : $t('Test Connect')}}</x-button>
-      <x-button type="primary" shape="circle" :loading="spinnerLoading" @click="_ok()">{{spinnerLoading ? 'Loading...' :item ? `${$t('Edit')}` : `${$t('Submit')}`}} </x-button>
+      <el-button type="text" ize="mini" @click="_close()"> {{$t('Cancel')}} </el-button>
+      <el-button type="success" size="mini" round @click="_testConnect()" :loading="testLoading">{{testLoading ? 'Loading...' : $t('Test Connect')}}</el-button>
+      <el-button type="primary" size="mini" round :loading="spinnerLoading" @click="_ok()">{{spinnerLoading ? 'Loading...' :item ? `${$t('Edit')}` : `${$t('Submit')}`}} </el-button>
     </div>
   </div>
 </template>
@@ -149,7 +186,6 @@
   import i18n from '@/module/i18n'
   import store from '@/conf/home/store'
   import { isJson } from '@/module/util/util'
-  import mPopup from '@/module/components/popup/popup'
   import mListBoxF from '@/module/components/listBoxF/listBoxF'
 
   export default {
@@ -172,18 +208,66 @@
         // data storage name
         database: '',
         // principal
-        principal:'',
+        principal: '',
+        // java.security.krb5.conf
+        javaSecurityKrb5Conf: '',
+        // login.user.keytab.username
+        loginUserKeytabUsername: '',
+        // login.user.keytab.path
+        loginUserKeytabPath: '',
         // database username
         userName: '',
         // Database password
         password: '',
+        // Database connect type
+        connectType: '',
         // Jdbc connection parameter
         other: '',
         // btn test loading
         testLoading: false,
         showPrincipal: true,
-        showdDatabase: false,
-        isShowPrincipal:true
+        showDatabase: false,
+        showConnectType: false,
+        isShowPrincipal: true,
+        prePortMapper: {},
+        datasourceTypeList: [
+          {
+            value: 'MYSQL',
+            label: 'MYSQL'
+          },
+          {
+            value: 'POSTGRESQL',
+            label: 'POSTGRESQL'
+          },
+          {
+            value: 'HIVE',
+            label: 'HIVE/IMPALA'
+          },
+          {
+            value: 'SPARK',
+            label: 'SPARK'
+          },
+          {
+            value: 'CLICKHOUSE',
+            label: 'CLICKHOUSE'
+          },
+          {
+            value: 'ORACLE',
+            label: 'ORACLE'
+          },
+          {
+            value: 'SQLSERVER',
+            label: 'SQLSERVER'
+          },
+          {
+            value: 'DB2',
+            label: 'DB2'
+          },
+          {
+            value: 'PRESTO',
+            label: 'PRESTO'
+          }
+        ]
       }
     },
     props: {
@@ -221,9 +305,13 @@
           host: this.host,
           port: this.port,
           database: this.database,
-          principal:this.principal,
+          principal: this.principal,
+          javaSecurityKrb5Conf: this.javaSecurityKrb5Conf,
+          loginUserKeytabUsername: this.loginUserKeytabUsername,
+          loginUserKeytabPath: this.loginUserKeytabPath,
           userName: this.userName,
           password: this.password,
+          connectType: this.connectType,
           other: this.other
         }
       },
@@ -282,7 +370,7 @@
           return false
         }
 
-        if (!this.database && this.showdDatabase == false) {
+        if (!this.database && this.showDatabase === false) {
           this.$message.warning(`${i18n.$t('Please enter database name')}`)
           return false
         }
@@ -292,7 +380,6 @@
             return false
           }
         }
-
         return true
       },
       /**
@@ -305,7 +392,7 @@
         if (this.item) {
           param.id = this.item.id
         }
-        this.store.dispatch(`datasource/${this.item ? `updateDatasource` : `createDatasources`}`, param).then(res => {
+        this.store.dispatch(`datasource/${this.item ? 'updateDatasource' : 'createDatasources'}`, param).then(res => {
           this.$message.success(res.msg)
           this.spinnerLoading = false
           this.$emit('onUpdate')
@@ -323,15 +410,77 @@
           this.name = res.name
           this.note = res.note
           this.host = res.host
-          this.port = res.port
+
+          // When in Editpage, Prevent default value overwrite backfill value
+          setTimeout(() => {
+            this.port = res.port
+          }, 0)
+
           this.principal = res.principal
+          this.javaSecurityKrb5Conf = res.javaSecurityKrb5Conf
+          this.loginUserKeytabUsername = res.loginUserKeytabUsername
+          this.loginUserKeytabPath = res.loginUserKeytabPath
           this.database = res.database
           this.userName = res.userName
           this.password = res.password
+          this.connectType = res.connectType
           this.other = JSON.stringify(res.other) === '{}' ? '' : JSON.stringify(res.other)
         }).catch(e => {
           this.$message.error(e.msg || '')
         })
+      },
+      /**
+       * Set default port for each type.
+       */
+      _setDefaultValues (value) {
+        // Default type is MYSQL
+        let type = this.type || 'MYSQL'
+
+        let defaultPort = this._getDefaultPort(type)
+
+        // Backfill the previous input from memcache
+        let mapperPort = this.prePortMapper[type]
+
+        this.port = mapperPort || defaultPort
+      },
+
+      /**
+       * Get default port by type
+       */
+      _getDefaultPort (type) {
+        let defaultPort = ''
+        switch (type) {
+          case 'MYSQL':
+            defaultPort = '3306'
+            break
+          case 'POSTGRESQL':
+            defaultPort = '5432'
+            break
+          case 'HIVE':
+            defaultPort = '10000'
+            break
+          case 'SPARK':
+            defaultPort = '10015'
+            break
+          case 'CLICKHOUSE':
+            defaultPort = '8123'
+            break
+          case 'ORACLE':
+            defaultPort = '1521'
+            break
+          case 'SQLSERVER':
+            defaultPort = '1433'
+            break
+          case 'DB2':
+            defaultPort = '50000'
+            break
+          case 'PRESTO':
+            defaultPort = '8080'
+            break
+          default:
+            break
+        }
+        return defaultPort
       }
     },
     created () {
@@ -340,20 +489,33 @@
         this._getEditDatasource()
       }
 
+      this._setDefaultValues()
     },
     watch: {
-      type(value){
-        if(value == 'POSTGRESQL') {
-          this.showdDatabase = true;
+      type (value) {
+        if (value === 'POSTGRESQL') {
+          this.showDatabase = true
         } else {
-          this.showdDatabase = false;
+          this.showDatabase = false
         }
+
+        if (value === 'ORACLE' && !this.item.id) {
+          this.showConnectType = true
+          this.connectType = 'ORACLE_SERVICE_NAME'
+        } else if (value === 'ORACLE' && this.item.id) {
+          this.showConnectType = true
+        } else {
+          this.showConnectType = false
+        }
+        // Set default port for each type datasource
+        this._setDefaultValues(value)
+
         return new Promise((resolve, reject) => {
           this.store.dispatch('datasource/getKerberosStartupState').then(res => {
-            this.isShowPrincipal=res
-            if((value =='HIVE'||value == 'SPARK')&&this.isShowPrincipal== true){
+            this.isShowPrincipal = res
+            if ((value === 'HIVE' || value === 'SPARK') && this.isShowPrincipal === true) {
               this.showPrincipal = false
-            }else{
+            } else {
               this.showPrincipal = true
             }
           }).catch(e => {
@@ -361,12 +523,19 @@
             reject(e)
           })
         })
+      },
+      /**
+       * Cache the previous input port for each type datasource
+       * @param value
+       */
+      port (value) {
+        this.prePortMapper[this.type] = value
       }
     },
 
     mounted () {
     },
-    components: { mPopup, mListBoxF }
+    components: { mListBoxF }
   }
 </script>
 
@@ -407,6 +576,5 @@
       margin-left: 0px !important;
     }
   }
-
 
 </style>

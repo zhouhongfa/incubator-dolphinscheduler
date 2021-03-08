@@ -17,78 +17,16 @@
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const { assetsDir, baseConfig } = require('./config')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const ProgressPlugin = require('progress-bar-webpack-plugin')
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
+const portfinder = require('portfinder')
 const getEnv = require('env-parse').getEnv
 
 const config = merge.smart(baseConfig, {
   devtool: 'eval-source-map',
   output: {
     filename: 'js/[name].js'
-  },
-  module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader',
-        options: {
-          hotReload: true // Open hot overload
-        }
-      },
-      {
-        test: /\.css$/,
-        loader: ExtractTextPlugin.extract({
-          use: [
-            'css-loader',
-            {
-              loader: 'postcss-loader',
-              options: {
-                plugins: (loader) => [
-                  require('autoprefixer')({
-                    overrideBrowserslist: [
-                      "Android 4.1",
-                      "iOS 7.1",
-                      "Chrome > 31",
-                      "ff > 31",
-                      "ie >= 8"
-                    ]              
-                  }),
-                  require('cssnano')
-                ]
-              }
-            }
-          ],
-          fallback: ['vue-style-loader']
-        })
-      },
-      {
-        test: /\.scss$/,
-        loader: ExtractTextPlugin.extract({
-          use: [
-            'css-loader',
-            'sass-loader',
-            {
-              loader: 'postcss-loader',
-              options: {
-                plugins: (loader) => [
-                  require('autoprefixer')({
-                    overrideBrowserslist: [
-                      "Android 4.1",
-                      "iOS 7.1",
-                      "Chrome > 31",
-                      "ff > 31",
-                      "ie >= 8"
-                    ] 
-                  }),
-                  require('cssnano')
-                ]
-              }
-            }
-          ],
-          fallback: ['vue-style-loader']
-        })
-      }
-    ]
   },
   devServer: {
     hot: true,
@@ -97,6 +35,7 @@ const config = merge.smart(baseConfig, {
     port: getEnv('DEV_PORT', 8888),
     host: getEnv('DEV_HOST', 'localhost'),
     noInfo: false,
+    overlay: { warnings: false, errors: true },
     historyApiFallback: true,
     disableHostCheck: true,
     proxy: {
@@ -106,20 +45,51 @@ const config = merge.smart(baseConfig, {
         changeOrigin: true
       }
     },
-    progress: false,
-    quiet: false,
+    progress: true,
+    quiet: true,
     stats: {
       colors: true
     },
-    clientLogLevel: 'none'
+    clientLogLevel: 'warning'
   },
   plugins: [
     new ProgressPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new ExtractTextPlugin({ filename: 'css/[name].css', allChunks: true }),
-    new webpack.optimize.CommonsChunkPlugin({ name: 'common', filename: 'js/[name].js' }),
-    new webpack.optimize.OccurrenceOrderPlugin()
-  ]
+    new MiniCssExtractPlugin({ filename: 'css/[name].css' })
+  ],
+  mode: 'development'
 })
 
-module.exports = config
+module.exports = new Promise((resolve, reject) => {
+  portfinder.basePort = process.env.PORT || config.devServer.port
+  portfinder.getPort((err, port) => {
+    if (err) {
+      reject(err)
+    } else {
+      // publish the new Port, necessary for e2e tests
+      process.env.PORT = port
+      // add port to devServer config
+      config.devServer.port = port
+      // Add FriendlyErrorsPlugin
+      config.plugins.push(new FriendlyErrorsPlugin({
+        compilationSuccessInfo: {
+          messages: [`Your application is running here: http://${config.devServer.host}:${port}`],
+        },
+        onErrors: () => {
+          const notifier = require('node-notifier')
+          return (severity, errors) => {
+            if (severity !== 'error') return
+            const error = errors[0]
+            const filename = error.file && error.file.split('!').pop()
+            notifier.notify({
+              title: packageConfig.name,
+              message: severity + ': ' + error.name,
+              subtitle: filename || ''
+            })
+          }
+        }
+      }))
+      resolve(config)
+    }
+  })
+})

@@ -18,8 +18,9 @@
 const path = require('path')
 const glob = require('globby')
 const webpack = require('webpack')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const HtmlWebpackExtPlugin = require('html-webpack-ext-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const isProduction = process.env.NODE_ENV !== 'development'
 
 const resolve = dir => path.join(__dirname, '..', dir)
@@ -46,7 +47,7 @@ const jsEntry = (() => {
     parts.shift()
     let modules = parts.join('/')
     let entry = moduleName(modules)
-    obj[entry] = val
+    obj[entry] = ['babel-polyfill', val]
   })
   return obj
 })()
@@ -94,7 +95,7 @@ const rewriterPath = p => {
     }
   }
 }
-
+const version = new Date().getTime();
 const pages = glob.sync(['*/!(_*).html'], { cwd: viewDir }).map(p => {
   let pagePath = `${path.join(viewDir, p)}`
   let newPagePath = rewriterPath(pagePath)
@@ -106,29 +107,41 @@ const pages = glob.sync(['*/!(_*).html'], { cwd: viewDir }).map(p => {
   }
   return new HtmlWebpackPlugin({
     filename: newPagePath || path.join('view', p),
-    template: `html-loader?min=false!${path.join(viewDir, p)}`,
+    template: `${path.join('src/view', p)}`,
     cache: true,
+    favicon:'./favicon.png',
     inject: true,
+    hash: version,
     chunks: chunks,
     minify: minifierConfig
   })
 })
-
 const baseConfig = {
   entry: jsEntry,
   output: {
     path: distDir,
     publicPath: '/',
-    filename: 'js/[name].[chunkhash:7].js'
-  },
-  devServer: {
-    historyApiFallback: true,
-    hot: true,
-    inline: true,
-    progress: true
+    filename: 'js/[name].[chunkhash:7]'+version+'.js'
   },
   module: {
     rules: [
+      {
+        test: /\.(js|vue)$/,
+        loader: 'eslint-loader',
+        enforce: 'pre',
+        include: [resolve('src')],
+        options: {
+          formatter: require('eslint-friendly-formatter'),
+          emitWarning: true
+        }
+      },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          hotReload: !isProduction
+        }
+      },
       {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
@@ -143,9 +156,40 @@ const baseConfig = {
         ]
       },
       {
+        test: /\.(sa|sc|c)ss$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: !isProduction,
+            },
+          },
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: (loader) => [
+                require('autoprefixer')({
+                  overrideBrowserslist: [
+                    "Android 4.1",
+                    "iOS 7.1",
+                    "Chrome > 31",
+                    "ff > 31",
+                    "ie >= 8"
+                  ]
+                }),
+                require('cssnano')
+              ]
+            }
+          },
+          'sass-loader'
+        ]
+      },
+      {
         test: /\.(png|jpe?g|gif|svg|cur)(\?.*)?$/,
         loader: 'file-loader',
         options: {
+          esModule: false,
           name: 'images/[name].[ext]?[hash]'
         }
       },
@@ -153,6 +197,7 @@ const baseConfig = {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         loader: 'url-loader',
         options: {
+          esModule: false,
           limit: 10000,
           // publicPath: distDir,
           name: 'font/[name].[hash:7].[ext]'
@@ -168,37 +213,17 @@ const baseConfig = {
     ],
     alias: {
       '@': resolve('src/js'),
-      '~': resolve('src/lib')
+      '~': resolve('src/lib'),
+      'jquery':'jquery/dist/jquery.min.js',
+      'jquery-ui': 'jquery-ui'
     },
-    extensions: ['.js', 'json', '.vue', '.scss']
-  },
-  externals: {
-    'vue': 'Vue',
-    'vuex': 'Vuex',
-    'vue-router': 'VueRouter',
-    'jquery': '$',
-    'lodash': '_',
-    'bootstrap': 'bootstrap',
-    'd3': 'd3',
-    'canvg': 'canvg',
-    'html2canvas': 'html2canvas',
-    './jsplumb': 'jsPlumb',
-    './highlight.js': 'highlight.js',
-    './clipboard': 'clipboard',
-    './codemirror': 'CodeMirror'
+    extensions: ['*', '.js', 'json', '.vue', '.scss']
   },
   plugins: [
-    new webpack.ProvidePlugin({ vue: 'Vue', _: 'lodash' }),
+    new VueLoaderPlugin(),
+    new webpack.ProvidePlugin({ vue: 'Vue', _: 'lodash',jQuery:"jquery/dist/jquery.min.js",$:"jquery/dist/jquery.min.js" }),
     new webpack.DefinePlugin({
       PUBLIC_PATH: JSON.stringify(process.env.PUBLIC_PATH ? process.env.PUBLIC_PATH : '')
-    }),
-    new HtmlWebpackExtPlugin({
-      cache: true,
-      delimiter: '$',
-      locals: {
-        NODE_ENV:isProduction,
-        PUBLIC_PATH: process.env.PUBLIC_PATH ? process.env.PUBLIC_PATH : ''
-      }
     }),
     ...pages
   ]
